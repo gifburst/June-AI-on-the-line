@@ -19,6 +19,8 @@
         if (this.readyState == 4 && this.status == 200) {
           // Split the txt file contents into an array of conversations
           conversations = this.responseText.split("\n");
+        } else if (this.readyState == 4 && this.status != 200) {
+          console.error("Error loading conversations: " + this.status);
         }
       };
       xhttp.open("GET", "dictionary.txt", true);
@@ -28,6 +30,12 @@
       function generateResponse() {
         // Get the user's input
         const userInput = document.getElementById("user-input").value;
+        
+        // Check if the conversations array has been populated yet
+        if (conversations.length == 0) {
+          console.warn("Conversations not yet loaded. Please try again.");
+          return;
+        }
         
         // Choose a random conversation from the array
         const randomIndex = Math.floor(Math.random() * conversations.length);
