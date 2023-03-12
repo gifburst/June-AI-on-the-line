@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Simple Cleverbot Example</title>
+  </head>
+  <body>
+    <h1>Simple Cleverbot Example</h1>
+    <input type="text" id="user-input" placeholder="Enter your message...">
+    <button onclick="generateResponse()">Send</button>
+    <textarea id="response-area" rows="10" cols="50" readonly></textarea>
+
+    <script>
+      // Create an empty array to store the conversations
+      let conversations = [];
+
+      // Use an AJAX request to read the conversations from the txt file
+      const xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          // Split the txt file contents into an array of conversations
+          conversations = this.responseText.split("\n");
+        }
+      };
+      xhttp.open("GET", "dictionary.txt", true);
+      xhttp.send();
+
+      // Create a function to generate Cleverbot's response
+      function generateResponse() {
+        // Get the user's input
+        const userInput = document.getElementById("user-input").value;
+        
+        // Choose a random conversation from the array
+        const randomIndex = Math.floor(Math.random() * conversations.length);
+        const conversation = conversations[randomIndex];
+
+        // Display Cleverbot's response in the text area
+        document.getElementById("response-area").value += "You: " + userInput + "\n";
+        document.getElementById("response-area").value += "Cleverbot: " + conversation + "\n\n";
+
+        // Clear the input field
+        document.getElementById("user-input").value = "";
+      }
+    </script>
+  </body>
+</html>
