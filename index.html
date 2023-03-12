@@ -1,37 +1,79 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8">
-    <title>Chatbot</title>
+    <title>Chatbot that learns from user input</title>
+    <script>
+      var chatlog = document.getElementById("chatlog");
+      var chatinput = document.getElementById("chatinput");
+      var memory = {};
+
+      function sendMessage() {
+        var message = chatinput.value;
+        chatinput.value = "";
+        appendMessage("You: " + message);
+        respond(message);
+        addToMemory(message);
+      }
+
+      function respond(message) {
+        var response;
+        if (memory.hasOwnProperty(message)) {
+          response = memory[message];
+        } else {
+          response = "I'm sorry, I didn't understand. Can you please rephrase?";
+        }
+        setTimeout(function() {
+          appendMessage("Chatbot: " + response);
+        }, 1000);
+      }
+
+      function addToMemory(message) {
+        if (!memory.hasOwnProperty(message)) {
+          memory[message] = "I'm sorry, I don't know the answer. Please tell me!";
+        }
+      }
+
+      function loadMemory() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+          if (this.readyState == 4 && this.status == 200) {
+            var lines = this.responseText.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+              var pair = lines[i].split(":");
+              memory[pair[0]] = pair[1];
+            }
+          }
+        };
+        xhttp.open("GET", "memory.txt", true);
+        xhttp.send();
+      }
+
+      function saveMemory() {
+        var data = "";
+        for (var key in memory) {
+          if (memory.hasOwnProperty(key)) {
+            data += key + ":" + memory[key] + "\n";
+          }
+        }
+        var blob = new Blob([data], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, "memory.txt");
+      }
+
+      function appendMessage(message) {
+        var div = document.createElement("div");
+        div.innerText = message;
+        chatlog.appendChild(div);
+      }
+
+      loadMemory();
+    </script>
   </head>
   <body>
-    <div id="chatlog"></div>
-    <input type="text" id="userinput">
-    <button onclick="respond()">Send</button>
-    <script>
-      const rules = {};
-      fetch('dictionary.txt')
-        .then(response => response.text())
-        .then(text => {
-          const lines = text.split('\n');
-          for (let i = 0; i < lines.length; i += 2) {
-            const question = lines[i].trim().toLowerCase();
-            const response = lines[i + 1].trim();
-            rules[question] = response;
-          }
-        });
-      function respond() {
-        const userinput = document.getElementById("userinput").value.toLowerCase().trim();
-        let response;
-        if (userinput in rules) {
-          response = rules[userinput];
-        } else {
-          response = "I'm sorry, I don't understand.";
-        }
-        document.getElementById("chatlog").innerHTML += "User: " + userinput + "<br>";
-        document.getElementById("chatlog").innerHTML += "Chatbot: " + response + "<br>";
-        document.getElementById("userinput").value = "";
-      }
-    </script>
+    <h1>Chatbot that learns from user input</h1>
+    <div id="chatbox">
+      <div id="chatlog"></div>
+      <input type="text" id="chatinput" placeholder="Type your message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </body>
 </html>
